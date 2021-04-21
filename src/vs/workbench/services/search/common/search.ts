@@ -203,9 +203,14 @@ export function isProgressMessage(p: ISearchProgressItem | ISerializedSearchProg
 	return !!(p as IProgressMessage).message;
 }
 
+export enum TextSearchCompleteMessageType {
+	Warning = 1,
+	Information = 2,
+}
+
 export interface ISearchCompleteStats {
 	limitHit?: boolean;
-	messages: string[];
+	messages: { text: string, type: TextSearchCompleteMessageType }[];
 	stats?: IFileSearchStats | ITextSearchStats;
 }
 
@@ -505,13 +510,13 @@ export interface ISearchEngine<T> {
 export interface ISerializedSearchSuccess {
 	type: 'success';
 	limitHit: boolean;
-	messages: string[];
+	messages: { text: string, type: TextSearchCompleteMessageType }[];
 	stats?: IFileSearchStats | ITextSearchStats;
 }
 
 export interface ISearchEngineSuccess {
 	limitHit: boolean;
-	messages: string[];
+	messages: { text: string, type: TextSearchCompleteMessageType }[];
 	stats: ISearchEngineStats;
 }
 

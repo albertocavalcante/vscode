@@ -216,9 +216,16 @@ export class GettingStartedService extends Disposable implements IGettingStarted
 			},
 				category.content.items.map((item, index) => {
 					this.getTaskOverrides(item, category.id);
+
+					const description = parseDescription(item.description);
+					const buttonDescription = (item as any as { button: LegacyButtonConfig }).button;
+					if (buttonDescription) {
+						description.push({ nodes: [{ href: buttonDescription.link ?? `command:${buttonDescription.command}`, label: buttonDescription.title }] });
+					}
+
 					return ({
 						...item,
-						description: parseDescription(item.description),
+						description: description,
 						category: category.id,
 						order: index,
 						when: ContextKeyExpr.deserialize(item.when) ?? ContextKeyExpr.true(),

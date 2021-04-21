@@ -74,7 +74,7 @@ import { FileMatch, FileMatchOrMatch, FolderMatch, FolderMatchWithResource, ICha
 import { createEditorFromSearchResult } from 'vs/workbench/contrib/searchEditor/browser/searchEditorActions';
 import { ACTIVE_GROUP, IEditorService, SIDE_GROUP } from 'vs/workbench/services/editor/common/editorService';
 import { IPreferencesService, ISettingsEditorOptions } from 'vs/workbench/services/preferences/common/preferences';
-import { IPatternInfo, ISearchComplete, ISearchConfiguration, ISearchConfigurationProperties, ITextQuery, SearchCompletionExitCode, SearchSortOrder } from 'vs/workbench/services/search/common/search';
+import { IPatternInfo, ISearchComplete, ISearchConfiguration, ISearchConfigurationProperties, ITextQuery, SearchCompletionExitCode, SearchSortOrder, TextSearchCompleteMessageType } from 'vs/workbench/services/search/common/search';
 import { ITextFileService } from 'vs/workbench/services/textfile/common/textfiles';
 
 const $ = dom.$;
@@ -1449,18 +1449,27 @@ export class SearchView extends ViewPane {
 				return;
 			}
 
+			let warningMessage = '';
+
 			if (completed && completed.limitHit) {
-				this.searchWidget.searchInput.showMessage({
-					content: nls.localize('searchMaxResultsWarning', "The result set only contains a subset of all matches. Be more specific in your search to narrow down the results."),
-					type: MessageType.WARNING
-				});
+				warningMessage += nls.localize('searchMaxResultsWarning', "The result set only contains a subset of all matches. Be more specific in your search to narrow down the results.");
 			}
 
 			if (completed && completed.messages) {
 				for (const message of completed.messages) {
-					this.addMessage(message);
+					if (message.type === TextSearchCompleteMessageType.Information) {
+						this.addMessage(message.text);
+					}
+					else if (message.type === TextSearchCompleteMessageType.Warning) {
+						warningMessage += (warningMessage ? ' - ' : '') + message.text;
+					}
 				}
 			}
+
+			this.searchWidget.searchInput.showMessage({
+				content: warningMessage,
+				type: MessageType.WARNING
+			});
 
 			if (!hasResults) {
 				const hasExcludes = !!excludePatternText;
